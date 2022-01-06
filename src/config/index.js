@@ -6,7 +6,7 @@ const env = import.meta.env.MODE || 'prod';
 
 const EnvConfig = {
     dev: {
-        baseApi: '/',
+        baseApi: '/api',
         mockApi: 'https://www.fastmock.site/mock/7a0b6683dabd27e51c01e8c4797bf763/api'
     },
     prod: {
@@ -22,5 +22,6 @@ const EnvConfig = {
 export default {
     env,
     mock: true,
+    nameSpace: "vueAdminSpace",
     ...EnvConfig[env]
 }
