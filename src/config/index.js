@@ -21,7 +21,7 @@ const EnvConfig = {
 
 export default {
     env,
-    mock: true,
+    mock: false,
     nameSpace: "vueAdminSpace",
     ...EnvConfig[env]
 }

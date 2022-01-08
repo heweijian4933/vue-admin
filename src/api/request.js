@@ -32,8 +32,8 @@ service.interceptors.response.use(res => {
     if (code === 200) {
         // 说明响应正常
         return data
-    } else if (code === 40001) {
-        // 40001: token认证失败(大部分情况下是因为token过期)
+    } else if (code === 50001) {
+        // 50001: token认证失败(大部分情况下是因为token过期)
         ElMessage.error(TOKEN_INVALID)
         setTimeout(() => {
             router.push('/login')
@@ -48,16 +48,20 @@ service.interceptors.response.use(res => {
 
 /**
  * 请求核心函数封装
- * @param {*} options 请求配置
+ * @param {*} options 请求配置参数,默认为 Object
  */
 function request(options) {
-    options.method = options.method || 'get'
+    let { method = "get", data, params, mock } = options
+    // options.method = options.method || 'get'
 
     // 习惯将get的参数设置到params,这样后续方便区分
-    if (options.method.toLowerCase() == 'get') {
-        options.params = options.data
+    if (method.toLowerCase() == 'get') {
+        params = data
     }
-
+    // 检查 options 里面对 mock 是否做了配置,如果是覆盖 config.mock
+    if (mock !== undefined) {
+        config.mock = mock
+    }
     if (config.env == 'prod') {
         // 强制将开发环境的请求地址设置正确,防止误入mock的请求地址造成事故
         service.defaults.baseURL = config.baseApi
