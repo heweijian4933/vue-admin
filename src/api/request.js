@@ -4,6 +4,7 @@
 
 import axios from 'axios';
 import config from '@/config'
+import store from '@/store'
 
 import router from '@/router'
 
@@ -19,9 +20,9 @@ const service = axios.create({
 
 // 请求拦截封装
 service.interceptors.request.use(req => {
-    // todo,添加token
+    const { token } = store.state.userInfo
     const headers = req.headers
-    if (!headers.Authorization) headers.Authorization = "Bear token to be added"
+    if (!headers.Authorization) headers.Authorization = "Bear " + token
     return req
 })
 
@@ -44,6 +45,45 @@ service.interceptors.response.use(res => {
         ElMessage.error(msg || NETWORK_ERROR)
         return Promise.reject(msg || NETWORK_ERROR)
     }
+}, (error) => {
+    const status =
+        (error.response &&
+            error.response.status &&
+            error.response.status) ||
+        '';
+    const data = (error.response && error.response.data) || {};
+    if (data.message) {
+        ElMessage.error(data.message);
+        return Promise.reject(data.message);
+    }
+
+    if (
+        error.code == 'ECONNABORTED' &&
+        error.message.indexOf('timeout') != -1
+    ) {
+        ElMessage.error('请求超时~~');
+        return Promise.reject('请求超时~~');
+    }
+    if (status === 401) {
+        ElMessage.error('登录过期,请重新登录');
+
+        setTimeout(() => {
+            router.push('/login')
+        }, 1000)
+        return Promise.reject('登录过期,请重新登录');
+    }
+    if (status === 404) {
+        ElMessage.error('接口404报错');
+        return Promise.reject('接口404报错');
+    }
+    if (status === 500) {
+        console.log(error.response);
+        ElMessage.error('服务器错误');
+        return Promise.reject('服务器错误');
+    }
+
+    ElMessage.error('未知错误');
+    return Promise.reject('未知错误');
 })
 
 /**

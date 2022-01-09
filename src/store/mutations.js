@@ -7,6 +7,10 @@ export default {
     saveUserInfo(state, userInfo) {
         state.userInfo = userInfo
         storage.setItem("userInfo", userInfo)
-    }
+    },
 
+    clearUserInfo(state) {
+        state.userInfo = {}
+        storage.clearItem("userInfo")
+    }
 }

@@ -3,17 +3,17 @@
     <div class="modal">
       <el-form ref="userForm" :model="userForm" status-icon :rules="rules">
         <div class="title">后台系统</div>
-        <el-form-item prop="username">
+        <el-form-item prop="userName">
           <el-input
             type="text"
-            v-model="userForm.username"
+            v-model="userForm.userName"
             prefix-icon="el-icon-user"
           ></el-input>
         </el-form-item>
-        <el-form-item prop="password">
+        <el-form-item prop="userPwd">
           <el-input
-            type="password"
-            v-model="userForm.password"
+            type="userPwd"
+            v-model="userForm.userPwd"
             prefix-icon="el-icon-view"
           ></el-input>
         </el-form-item>
@@ -27,23 +27,24 @@
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 export default {
   name: "Login",
   data() {
     return {
       userForm: {
-        username: "",
-        password: "",
+        userName: "",
+        userPwd: "",
       },
       rules: {
-        username: [
+        userName: [
           {
             required: true,
             message: "请输入用户名",
             trigger: "blur",
           },
         ],
-        password: [
+        userPwd: [
           {
             required: true,
             message: "请输入用户名",
@@ -57,12 +58,18 @@ export default {
     login() {
       this.$refs.userForm.validate((valid) => {
         if (valid) {
-          console.log("校验合格");
-          this.$api.login(this.userForm).then((res) => {
-            console.log(res);
-            this.$store.commit("saveUserInfo", res);
-            this.$router.push("/welcome");
-          });
+          this.$api
+            .login(this.userForm)
+            .then((res) => {
+              ElMessage.success("登陆成功");
+              this.$store.commit("saveUserInfo", res);
+              setTimeout(() => {
+                this.$router.push("/welcome");
+              }, 1000);
+            })
+            .catch((e) => {
+              console.log(e);
+            });
         } else {
           return false;
         }

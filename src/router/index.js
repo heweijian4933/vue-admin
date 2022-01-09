@@ -21,6 +21,35 @@ const routes = [
                 component: () => import('@/views/Welcome.vue'),
             },
 
+            {
+                path: '/system/user',
+                name: 'user',
+                meta: {
+                    title: '用户管理'
+                },
+                component: () => import('@/views/Welcome.vue'),
+                children: [
+                    {
+                        path: 'add',
+                        name: '新增',
+                        meta: {
+                            title: '用户新增'
+                        },
+                        component: () => import('@/views/Welcome.vue'),
+                        children: [
+                            {
+                                path: 'add-sub',
+                                name: '新增-sub',
+                                meta: {
+                                    title: '用户新增-sub'
+                                },
+                                component: () => import('@/views/Welcome.vue'),
+                            },
+                        ]
+                    },
+                ]
+            },
+
         ]
     },
     {
@@ -31,6 +60,7 @@ const routes = [
         },
         component: () => import('@/views/Login.vue'),
     },
+
 ]
 
 const router = createRouter({
