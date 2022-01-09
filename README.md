@@ -1,5 +1,11 @@
 # vite+vue
 
+2021/1/7
+- 登录页面搭建
+- vuex 引入
+- vite 代理设置,login接口初步调联完成
+
+
 2021/1/6
 
 - axios二次封装api/request.js
