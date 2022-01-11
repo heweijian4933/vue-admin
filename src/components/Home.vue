@@ -220,7 +220,7 @@ export default {
       padding: 20px;
       height: calc(100vh - 50px);
       .content-main {
-        background-color: #fff;
+        // background-color: #fff;
         height: 100%;
       }
     }

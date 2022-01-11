@@ -22,32 +22,12 @@ const routes = [
             },
 
             {
-                path: '/system/user',
+                path: 'user',
                 name: 'user',
                 meta: {
                     title: '用户管理'
                 },
-                component: () => import('@/views/Welcome.vue'),
-                children: [
-                    {
-                        path: 'add',
-                        name: '新增',
-                        meta: {
-                            title: '用户新增'
-                        },
-                        component: () => import('@/views/Welcome.vue'),
-                        children: [
-                            {
-                                path: 'add-sub',
-                                name: '新增-sub',
-                                meta: {
-                                    title: '用户新增-sub'
-                                },
-                                component: () => import('@/views/Welcome.vue'),
-                            },
-                        ]
-                    },
-                ]
+                component: () => import('@/views/User.vue'),
             },
 
         ]

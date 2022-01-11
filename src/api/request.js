@@ -96,7 +96,7 @@ function request(options) {
 
     // 习惯将get的参数设置到params,这样后续方便区分
     if (method.toLowerCase() == 'get') {
-        params = data
+        options.params = data
     }
     // 检查 options 里面对 mock 是否做了配置,如果是覆盖 config.mock
     if (mock !== undefined) {

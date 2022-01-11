@@ -6,7 +6,7 @@ export default {
             url: "menu/list",
             method: "get",
             data: params,
-            // mock: false,
+            mock: true,
         })
     },
 
@@ -20,13 +20,23 @@ export default {
         })
     },
 
+    // 系统模块
+    getUserList(params) {
+        return request({
+            url: "users/list",
+            method: "get",
+            data: params,
+            mock: true,
+        })
+    },
+
     // 审批模块
     noticeCount(params) {
         return request({
             url: "leave/count",
             method: "get",
             data: params,
-            // mock: false,
+            mock: true,
         })
     }
 }
