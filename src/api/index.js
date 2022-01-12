@@ -29,6 +29,46 @@ export default {
             mock: true,
         })
     },
+    userAdd(params) {
+        return request({
+            url: "users/add",
+            method: "post",
+            data: params,
+            mock: true,
+        })
+    },
+    userUpdate(params) {
+        return request({
+            url: "users/Update",
+            method: "post",
+            data: params,
+            mock: true,
+        })
+    },
+    userDel(params) {
+        return request({
+            url: "users/delete",
+            method: "post",
+            data: params,
+            mock: true,
+        })
+    },
+    getRoleAllList(params) {
+        return request({
+            url: "roles/allList",
+            method: "get",
+            data: params,
+            mock: true,
+        })
+    },
+    getDeptAllList(params) {
+        return request({
+            url: "dept/allList",
+            method: "get",
+            data: params,
+            mock: true,
+        })
+    },
 
     // 审批模块
     noticeCount(params) {
