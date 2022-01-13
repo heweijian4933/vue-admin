@@ -73,11 +73,19 @@
         :rules="userRules"
       >
         <el-form-item prop="userName" label="用户名">
-          <el-input v-model="userForm.userName" placeholder="请输入用户名" />
+          <el-input
+            v-model="userForm.userName"
+            placeholder="请输入用户名"
+            :disabled="action == 'edit'"
+          />
         </el-form-item>
 
         <el-form-item label="用户邮箱" prop="userEmail">
-          <el-input v-model="userForm.userEmail" placeholder="请输入用户邮箱">
+          <el-input
+            v-model="userForm.userEmail"
+            placeholder="请输入用户邮箱"
+            :disabled="action == 'edit'"
+          >
             <template #append>
               <span>@manager.com</span>
             </template>
@@ -306,9 +314,12 @@ export default {
       showModal.value = true;
     };
     // 编辑用户
-    const handleEdit = () => {
+    const handleEdit = (row) => {
       action.value = "edit";
       showModal.value = true;
+      ctx.$nextTick(() => {
+        Object.assign(userForm, row);
+      });
     };
 
     //分页
@@ -385,6 +396,7 @@ export default {
       userRules,
       roleAllList,
       deptAllList,
+      action,
 
       getUserList,
       handleQuery,

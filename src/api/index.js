@@ -26,7 +26,7 @@ export default {
             url: "users/list",
             method: "get",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     userAdd(params) {
@@ -34,7 +34,7 @@ export default {
             url: "users/add",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     userUpdate(params) {
@@ -42,7 +42,7 @@ export default {
             url: "users/Update",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     userDel(params) {
@@ -50,7 +50,7 @@ export default {
             url: "users/delete",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     getRoleAllList(params) {

@@ -5,7 +5,6 @@
 import axios from 'axios';
 import config from '@/config'
 import store from '@/store'
-
 import router from '@/router'
 
 import { ElMessage } from "element-plus"
@@ -22,7 +21,7 @@ const service = axios.create({
 service.interceptors.request.use(req => {
     const { token } = store.state.userInfo
     const headers = req.headers
-    if (!headers.Authorization) headers.Authorization = "Bear " + token
+    if (!headers.Authorization) headers.Authorization = "Bearer " + token
     return req
 })
 
@@ -98,15 +97,28 @@ function request(options) {
     if (method.toLowerCase() == 'get') {
         options.params = data
     }
-    // 检查 options 里面对 mock 是否做了配置,如果是覆盖 config.mock
-    if (mock !== undefined) {
-        config.mock = mock
+    // [禁用]以下操作会覆盖全局config的配置, mock接口和本地接口混用后因为axios实例共用的问题, 导致接口调用混乱
+    /*  // 检查 options 里面对 mock 是否做了配置,如果是覆盖 config.mock
+     if (mock !== undefined) {
+         config.mock = mock
+     } */
+
+    // 改用方法如下(也可以采用三元表达式嵌套,但是如下语义更加清晰)
+    let url = ''
+    if (mock) {
+        url = config.mockApi
+    } else if (config.mock) {
+        url = config.mockApi
+    } else {
+        url = config.baseApi
     }
+
+
     if (config.env == 'prod') {
         // 强制将开发环境的请求地址设置正确,防止误入mock的请求地址造成事故
         service.defaults.baseURL = config.baseApi
     } else {
-        service.defaults.baseURL = config.mock ? config.mockApi : config.baseApi
+        service.defaults.baseURL = url
     }
 
     return service(options)
