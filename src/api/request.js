@@ -103,22 +103,14 @@ function request(options) {
          config.mock = mock
      } */
 
-    // 改用方法如下(也可以采用三元表达式嵌套,但是如下语义更加清晰)
-    let url = ''
-    if (mock) {
-        url = config.mockApi
-    } else if (config.mock) {
-        url = config.mockApi
-    } else {
-        url = config.baseApi
-    }
-
+    let isMock = config.mock
+    if (mock !== undefined) isMock = mock
 
     if (config.env == 'prod') {
         // 强制将开发环境的请求地址设置正确,防止误入mock的请求地址造成事故
         service.defaults.baseURL = config.baseApi
     } else {
-        service.defaults.baseURL = url
+        service.defaults.baseURL = isMock ? config.mockApi : config.baseApi
     }
 
     return service(options)

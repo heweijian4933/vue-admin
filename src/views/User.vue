@@ -144,7 +144,15 @@
   </div>
 </template>
 <script>
-import { onMounted, reactive, ref, getCurrentInstance, toRaw } from "vue";
+import {
+  onMounted,
+  reactive,
+  ref,
+  getCurrentInstance,
+  toRaw,
+  watch,
+} from "vue";
+import util from "@/utils/util.js";
 export default {
   name: "User",
   setup() {
@@ -195,10 +203,16 @@ export default {
       {
         label: "注册时间",
         prop: "createTime",
+        formatter(row, colume, cellValue, index) {
+          return util.formatDate(new Date(cellValue + ""));
+        },
       },
       {
         label: "最后登录时间",
         prop: "lastLoginTime",
+        formatter(row, colume, cellValue, index) {
+          return util.formatDate(new Date(cellValue + ""));
+        },
       },
     ]);
     const checkedIds = ref([]);
