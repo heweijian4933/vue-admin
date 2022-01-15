@@ -235,7 +235,7 @@ export default {
       ],
       mobile: [
         {
-          pattern: /1\d{10}/,
+          pattern: /1[3-9]\d{9}/,
           message: "请输入正确手机号格式",
           trigger: "blur",
         },
@@ -294,10 +294,12 @@ export default {
           userIds, //可单个删除或者多个删除
         });
 
-        if (res && res.nModified > 0) {
+        if (res && res.affectedDocs > 0) {
           //返回字段变动时将影响判断,需要非常注意
-          ctx.$message.success("删除成功");
+          ctx.$message.success("成功删除");
           getUserList();
+        } else if (res && res.affectedDocs <= 0) {
+          ctx.$message.success('该人员已删除/设置为"离职"');
         } else {
           ctx.$message.error("删除失败");
         }
@@ -376,11 +378,15 @@ export default {
             res = await ctx.$api.userUpdate(params);
             message = "用户更新成功";
           }
-          if (res) {
+          if (res && res.affectedDocs > 0) {
             showModal.value = false;
             ctx.$message.success(message);
             handleReset("dialogForm");
             getUserList();
+          } else if (res && res.affectedDocs <= 0) {
+            ctx.$message.success("资料无需更新");
+          } else {
+            ctx.$message.error("删除失败");
           }
         }
       });
