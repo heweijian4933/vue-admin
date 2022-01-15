@@ -29,9 +29,9 @@ export default {
             // mock: true,
         })
     },
-    userAdd(params) {
+    userCreate(params) {
         return request({
-            url: "users/add",
+            url: "users/create",
             method: "post",
             data: params,
             // mock: true,

@@ -79,6 +79,9 @@
             :disabled="action == 'edit'"
           />
         </el-form-item>
+        <el-form-item prop="userPwd" label="用户密码" v-if="action == 'add'">
+          <el-input v-model="userForm.userPwd" placeholder="请输入密码" />
+        </el-form-item>
 
         <el-form-item label="用户邮箱" prop="userEmail">
           <el-input
@@ -92,7 +95,11 @@
           </el-input>
         </el-form-item>
         <el-form-item label="用户手机号" prop="mobile">
-          <el-input v-model="userForm.mobile" placeholder="请输入用户手机号" />
+          <el-input
+            type="number"
+            v-model="userForm.mobile"
+            placeholder="请输入用户手机号"
+          />
         </el-form-item>
         <el-form-item label="用户性别" prop="sex">
           <el-select v-model="userForm.sex" placeholder="请选择用户性别">
@@ -197,14 +204,14 @@ export default {
         label: "注册时间",
         prop: "createTime",
         formatter(row, colume, cellValue, index) {
-          return util.dateFmt(new Date(cellValue));
+          return cellValue ? util.dateFmt(new Date(cellValue)) : null;
         },
       },
       {
         label: "最后登录时间",
         prop: "lastLoginTime",
         formatter(row, colume, cellValue, index) {
-          return util.dateFmt(new Date(cellValue));
+          return cellValue ? util.dateFmt(new Date(cellValue)) : "无登录记录";
         },
       },
     ]);
@@ -216,6 +223,7 @@ export default {
     });
     const roleAllList = ref([]);
     const deptAllList = ref([]);
+    const action = ref("add");
 
     // 表单校验规则
     const userRules = reactive({
@@ -225,6 +233,14 @@ export default {
           message: "请输入用户姓名",
           trigger: "blur",
         },
+      ],
+      userPwd: [
+        {
+          required: action.value === "add" ? true : false,
+          message: "请输入 用户密码",
+          trigger: "blur",
+        },
+        // Todo 密码正则校验
       ],
       userEmail: [
         {
@@ -248,7 +264,7 @@ export default {
         },
       ],
     });
-    const action = ref("add");
+
     // 获取用户列表
     const getUserList = async () => {
       const params = { ...user, ...pager };
@@ -372,7 +388,7 @@ export default {
             : params.userEmail + "@manager.com";
           let res, message;
           if (action.value == "add") {
-            res = await ctx.$api.userAdd(params);
+            res = await ctx.$api.userCreate(params);
             message = "用户新增成功";
           } else if (action.value == "edit") {
             res = await ctx.$api.userUpdate(params);
@@ -384,9 +400,17 @@ export default {
             handleReset("dialogForm");
             getUserList();
           } else if (res && res.affectedDocs <= 0) {
-            ctx.$message.success("资料无需更新");
+            if (action.value == "add") {
+              ctx.$message.error("创建失败");
+            } else if (action.value == "edit") {
+              ctx.$message.success("信息无变更");
+            }
           } else {
-            ctx.$message.error("删除失败");
+            if (action.value == "add") {
+              ctx.$message.error("创建失败");
+            } else if (action.value == "edit") {
+              ctx.$message.success("更新失败");
+            }
           }
         }
       });
