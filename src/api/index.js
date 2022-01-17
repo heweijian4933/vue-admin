@@ -3,10 +3,34 @@ export default {
     // 菜单模块
     getMenuList(params) {
         return request({
-            url: "menu/list",
+            url: "menus/list",
             method: "get",
             data: params,
+            // mock: true,
+        })
+    },
+    menuCreate(params) {
+        return request({
+            url: "menus/create",
+            method: "post",
+            data: params,
+            // mock: true,
+        })
+    },
+    menuDel(params) {
+        return request({
+            url: "menus/delete",
+            method: "post",
+            data: params,
             mock: true,
+        })
+    },
+    menuUpdate(params) {
+        return request({
+            url: "menus/update",
+            method: "post",
+            data: params,
+            // mock: true,
         })
     },
 
@@ -29,9 +53,9 @@ export default {
             // mock: true,
         })
     },
-    userAdd(params) {
+    userCreate(params) {
         return request({
-            url: "users/add",
+            url: "users/create",
             method: "post",
             data: params,
             // mock: true,
@@ -50,7 +74,7 @@ export default {
             url: "users/delete",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     getRoleAllList(params) {

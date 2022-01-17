@@ -1,5 +1,6 @@
 <template>
   <div class="user-view">
+    <!-- 搜索查询模块 -->
     <div class="query-form">
       <el-form :inline="true" :model="user" ref="userQuery">
         <el-form-item prop="userId" label="用户ID">
@@ -24,6 +25,9 @@
         </el-form-item>
       </el-form>
     </div>
+    <!-- /搜索查询模块 -->
+
+    <!-- 主体tabel模块 -->
     <div class="base-table">
       <div class="action">
         <el-button type="primary" @click="handleAdd">新增</el-button>
@@ -65,6 +69,9 @@
         @current-change="handleCurrentChange"
       />
     </div>
+    <!-- /主体tabel模块 -->
+
+    <!-- 弹窗模块 -->
     <el-dialog v-model="showModal" title="编辑用户" center>
       <el-form
         :model="userForm"
@@ -79,6 +86,9 @@
             :disabled="action == 'edit'"
           />
         </el-form-item>
+        <el-form-item prop="userPwd" label="用户密码" v-if="action == 'add'">
+          <el-input v-model="userForm.userPwd" placeholder="请输入密码" />
+        </el-form-item>
 
         <el-form-item label="用户邮箱" prop="userEmail">
           <el-input
@@ -92,7 +102,11 @@
           </el-input>
         </el-form-item>
         <el-form-item label="用户手机号" prop="mobile">
-          <el-input v-model="userForm.mobile" placeholder="请输入用户手机号" />
+          <el-input
+            type="number"
+            v-model="userForm.mobile"
+            placeholder="请输入用户手机号"
+          />
         </el-form-item>
         <el-form-item label="用户性别" prop="sex">
           <el-select v-model="userForm.sex" placeholder="请选择用户性别">
@@ -141,30 +155,27 @@
         </span>
       </template>
     </el-dialog>
+    <!-- /弹窗模块 -->
   </div>
 </template>
 <script>
-import {
-  onMounted,
-  reactive,
-  ref,
-  getCurrentInstance,
-  toRaw,
-  watch,
-} from "vue";
+import { onMounted, reactive, ref, getCurrentInstance, toRaw } from "vue";
 import util from "@/utils/util.js";
 export default {
   name: "User",
   setup() {
     const { ctx } = getCurrentInstance();
+    // 查询模块对象
     const user = reactive({
       state: 0,
     });
+    // 分页模块对象
     const pager = reactive({
       pageNum: 1,
       pageSize: 10,
     });
 
+    // table主体对象
     const userList = ref([]);
     const columns = reactive([
       {
@@ -204,25 +215,32 @@ export default {
         label: "注册时间",
         prop: "createTime",
         formatter(row, colume, cellValue, index) {
-          return util.formatDate(new Date(cellValue + ""));
+          return cellValue ? util.dateFmt(new Date(cellValue)) : null;
         },
       },
       {
         label: "最后登录时间",
         prop: "lastLoginTime",
         formatter(row, colume, cellValue, index) {
-          return util.formatDate(new Date(cellValue + ""));
+          return cellValue ? util.dateFmt(new Date(cellValue)) : "无登录记录";
         },
       },
     ]);
+
+    // table主体多选功能关联的userId
     const checkedIds = ref([]);
+    // 弹框显示控制flag
     const showModal = ref(false);
+    // 弹框用户对象
     const userForm = reactive({
       state: 3,
       sex: 0,
     });
+    // 角色列表=>用于弹框内选择,编辑用户的角色,
     const roleAllList = ref([]);
+    // 部门列表=>用于弹框内选择,编辑用户所在部门
     const deptAllList = ref([]);
+    const action = ref("add");
 
     // 表单校验规则
     const userRules = reactive({
@@ -233,6 +251,14 @@ export default {
           trigger: "blur",
         },
       ],
+      userPwd: [
+        {
+          required: action.value === "add" ? true : false,
+          message: "请输入 用户密码",
+          trigger: "blur",
+        },
+        // Todo 密码正则校验
+      ],
       userEmail: [
         {
           required: true,
@@ -242,7 +268,7 @@ export default {
       ],
       mobile: [
         {
-          pattern: /1\d{10}/,
+          pattern: /1[3-9]\d{9}/,
           message: "请输入正确手机号格式",
           trigger: "blur",
         },
@@ -255,7 +281,7 @@ export default {
         },
       ],
     });
-    const action = ref("add");
+
     // 获取用户列表
     const getUserList = async () => {
       const params = { ...user, ...pager };
@@ -301,10 +327,12 @@ export default {
           userIds, //可单个删除或者多个删除
         });
 
-        if (res && res.nModified > 0) {
+        if (res && res.affectedDocs > 0) {
           //返回字段变动时将影响判断,需要非常注意
-          ctx.$message.success("删除成功");
+          ctx.$message.success("成功删除");
           getUserList();
+        } else if (res && res.affectedDocs <= 0) {
+          ctx.$message.success('该人员已删除/设置为"离职"');
         } else {
           ctx.$message.error("删除失败");
         }
@@ -377,17 +405,29 @@ export default {
             : params.userEmail + "@manager.com";
           let res, message;
           if (action.value == "add") {
-            res = await ctx.$api.userAdd(params);
+            res = await ctx.$api.userCreate(params);
             message = "用户新增成功";
           } else if (action.value == "edit") {
             res = await ctx.$api.userUpdate(params);
             message = "用户更新成功";
           }
-          if (res) {
+          if (res && res.affectedDocs > 0) {
             showModal.value = false;
             ctx.$message.success(message);
             handleReset("dialogForm");
             getUserList();
+          } else if (res && res.affectedDocs <= 0) {
+            if (action.value == "add") {
+              ctx.$message.error("创建失败");
+            } else if (action.value == "edit") {
+              ctx.$message.success("信息无变更");
+            }
+          } else {
+            if (action.value == "add") {
+              ctx.$message.error("创建失败");
+            } else if (action.value == "edit") {
+              ctx.$message.success("更新失败");
+            }
           }
         }
       });
