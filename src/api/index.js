@@ -22,7 +22,7 @@ export default {
             url: "menus/delete",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     menuUpdate(params) {

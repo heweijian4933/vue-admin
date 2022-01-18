@@ -223,6 +223,15 @@ export default {
             trigger: "blur",
           },
         ],
+        path: [
+          {
+            required: () => {
+              return this.menuForm.menuType == 1 ? true : false;
+            },
+            message: "请输入菜单路径",
+            trigger: "blur",
+          },
+        ],
       },
     };
   },
@@ -249,7 +258,6 @@ export default {
     },
     // 增加菜单
     handleAdd(type, row) {
-      console.log({ type, row });
       this.showModal = true;
       this.action = "add";
       // type === 2, 表示当前
@@ -286,10 +294,15 @@ export default {
           } else if (action === "edit") {
             res = await this.$api.menuUpdate(menuForm);
           }
-          this.showModal = false;
-          this.$message.success("操作成功");
-          this.handleReset("dialogForm");
-          this.getMenuList();
+
+          if (res && res.affectedDocs > 0) {
+            this.showModal = false;
+            this.$message.success("操作成功");
+            this.handleReset("dialogForm");
+            this.getMenuList();
+          } else {
+            this.$message.error("操作失败,请重试");
+          }
         }
       });
     },

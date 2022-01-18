@@ -110,7 +110,7 @@ export default {
     },
     async getMenuList() {
       // Todo 权限: 根据params用户信息来返回
-      const menuList = await this.$api.getMenuList();
+      const menuList = await this.$api.getMenuList({ mock: true });
       // console.log(menuList);
       this.userMenu = menuList;
     },

@@ -93,7 +93,7 @@ function request(options) {
     let { method = "get", data, params, mock } = options
     // options.method = options.method || 'get'
 
-    // 习惯将get的参数设置到params,这样后续方便区分
+    // 习惯将get的参数设置到params,这样后续方便区分可能能用到
     if (method.toLowerCase() == 'get') {
         options.params = data
     }
@@ -105,6 +105,7 @@ function request(options) {
 
     let isMock = config.mock
     if (mock !== undefined) isMock = mock
+    if (data && data.mock != undefined) isMock = data.mock //[仅调试用]
 
     if (config.env == 'prod') {
         // 强制将开发环境的请求地址设置正确,防止误入mock的请求地址造成事故
@@ -117,7 +118,7 @@ function request(options) {
 }
 
 // 以上request会在main.js里面挂载作为全局关键字$request去调用
-// 直接$request({options}).then(res=>{//do something})就可以调用
+// 直接$request({options}).then(res=>{//do something})就可以调用,也可以采用async/await
 // 有些时候或者有些成员习惯用request.get('/query',{name:'stephen'},{mock:true})这样的方式来请求
 // 因此对request的不同方法做了以下配置
 ['get', 'post', 'put', 'delete', 'patch'].forEach(method => {

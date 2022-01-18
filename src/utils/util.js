@@ -15,7 +15,6 @@ function dateFmt(date, rule) {
         }
 
     }
-    console.log(rule);
     return rule
 }
 

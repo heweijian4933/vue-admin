@@ -15,6 +15,7 @@
             type="userPwd"
             v-model="userForm.userPwd"
             prefix-icon="el-icon-view"
+            @keyup.enter="login"
           ></el-input>
         </el-form-item>
         <el-form-item>
