@@ -6,7 +6,7 @@ export default {
             url: "menus/list",
             method: "get",
             data: params,
-            // mock: true,
+            mock: true,
         })
     },
     menuCreate(params) {
@@ -31,6 +31,40 @@ export default {
             method: "post",
             data: params,
             // mock: true,
+        })
+    },
+
+    // 角色模块
+    getRoleList(params) {
+        return request({
+            url: "roles/list",
+            method: "get",
+            data: params,
+            mock: true,
+        })
+    },
+    roleCreate(params) {
+        return request({
+            url: "roles/create",
+            method: "post",
+            data: params,
+            mock: true,
+        })
+    },
+    roleUpdate(params) {
+        return request({
+            url: "roles/update",
+            method: "post",
+            data: params,
+            mock: true,
+        })
+    },
+    roleDel(params) {
+        return request({
+            url: "roles/delete",
+            method: "post",
+            data: params,
+            mock: true,
         })
     },
 

@@ -2,26 +2,28 @@
   <div class="user-view">
     <!-- 搜索查询模块 -->
     <div class="query-form">
-      <el-form :inline="true" :model="user" ref="userQuery">
+      <el-form :inline="true" :model="queryForm" ref="userQueryRef">
         <el-form-item prop="userId" label="用户ID">
-          <el-input v-model="user.userId" placeholder="请输入用户ID" />
+          <el-input v-model="queryForm.userId" placeholder="请输入用户ID" />
         </el-form-item>
         <el-form-item prop="userName" label="用户名">
-          <el-input v-model="user.userName" placeholder="请输入用户名" />
+          <el-input v-model="queryForm.userName" placeholder="请输入用户名" />
         </el-form-item>
+
         <el-form-item prop="state" label="状态">
-          <el-select v-model="user.state">
+          <el-select v-model="queryForm.state">
             <el-option :value="0" label="所有" />
             <el-option :value="1" label="在职" />
             <el-option :value="2" label="离职" />
             <el-option :value="3" label="试用期" />
           </el-select>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery">查询</el-button>
-            <el-button type="danger" @click="handleReset('userQuery')"
-              >重置</el-button
-            >
-          </el-form-item>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button type="danger" @click="handleReset('userQueryRef')"
+            >重置</el-button
+          >
         </el-form-item>
       </el-form>
     </div>
@@ -75,7 +77,7 @@
     <el-dialog v-model="showModal" title="编辑用户" center>
       <el-form
         :model="userForm"
-        ref="dialogForm"
+        ref="dialogFormRef"
         label-width="100px"
         :rules="userRules"
       >
@@ -166,7 +168,7 @@ export default {
   setup() {
     const { ctx } = getCurrentInstance();
     // 查询模块对象
-    const user = reactive({
+    const queryForm = reactive({
       state: 0,
     });
     // 分页模块对象
@@ -284,7 +286,7 @@ export default {
 
     // 获取用户列表
     const getUserList = async () => {
-      const params = { ...user, ...pager };
+      const params = { ...queryForm, ...pager };
       try {
         const { list, page } = await ctx.$api.getUserList(params);
         // console.log({ list, page });
@@ -392,12 +394,12 @@ export default {
     // 用户弹窗关闭
     const handleCancel = () => {
       showModal.value = false;
-      handleReset("dialogForm");
+      handleReset("dialogFormRef");
     };
     // 用户提交
     const handleSubmit = () => {
       // showModal.value = false;
-      ctx.$refs.dialogForm.validate(async (valid) => {
+      ctx.$refs.dialogFormRef.validate(async (valid) => {
         if (valid) {
           let params = toRaw(userForm); //把响应式对象转换成普通对象
           params.userEmail = /@/.test(params.userEmail)
@@ -414,7 +416,7 @@ export default {
           if (res && res.affectedDocs > 0) {
             showModal.value = false;
             ctx.$message.success(message);
-            handleReset("dialogForm");
+            handleReset("dialogFormRef");
             getUserList();
           } else if (res && res.affectedDocs <= 0) {
             if (action.value == "add") {
@@ -442,7 +444,7 @@ export default {
 
     return {
       pager,
-      user,
+      queryForm,
       userList,
       columns,
       userForm,

@@ -2,21 +2,23 @@
   <div class="menu-view">
     <!-- 搜索查询模块 -->
     <div class="query-form">
-      <el-form :inline="true" :model="queryForm" ref="menuQuery">
+      <el-form :inline="true" :model="queryForm" ref="menuQueryRef">
         <el-form-item prop="menuName" label="菜单名称">
           <el-input v-model="queryForm.menuName" placeholder="请输入菜单名称" />
         </el-form-item>
+
         <el-form-item prop="menuState" label="菜单状态">
           <el-select v-model="queryForm.menuState" placeholder="请输入菜单状态">
             <el-option :value="1" label="正常" />
             <el-option :value="2" label="停用" />
           </el-select>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery">查询</el-button>
-            <el-button type="danger" @click="handleReset('menuQuery')"
-              >重置</el-button
-            >
-          </el-form-item>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button type="danger" @click="handleReset('menuQueryRef')"
+            >重置</el-button
+          >
         </el-form-item>
       </el-form>
     </div>
@@ -74,7 +76,7 @@
     <el-dialog v-model="showModal" title="编辑菜单" center>
       <el-form
         :model="menuForm"
-        ref="dialogForm"
+        ref="dialogFormRef"
         label-width="100px"
         :rules="menuRules"
       >
@@ -260,7 +262,7 @@ export default {
     handleAdd(type, row) {
       this.showModal = true;
       this.action = "add";
-      // type === 2, 表示当前
+      // type === 2, 表示当前需要将row._id拼接,到parentId,这样cascader绑定后才能自动接入显示层级关系
       if (type === 2) {
         this.menuForm.parentId = [...row.parentId, row._id].filter(
           (item) => item
@@ -285,7 +287,7 @@ export default {
     },
     // 提交 增加/编辑
     handleSubmit() {
-      this.$refs.dialogForm.validate(async (valid) => {
+      this.$refs.dialogFormRef.validate(async (valid) => {
         if (valid) {
           const { action, menuForm } = this;
           let res;
@@ -298,7 +300,7 @@ export default {
           if (res && res.affectedDocs > 0) {
             this.showModal = false;
             this.$message.success("操作成功");
-            this.handleReset("dialogForm");
+            this.handleReset("dialogFormRef");
             this.getMenuList();
           } else {
             this.$message.error("操作失败,请重试");
@@ -309,7 +311,7 @@ export default {
     // 取消 增加/编辑
     handleCancel() {
       this.showModal = false;
-      this.handleReset("dialogForm");
+      this.handleReset("dialogFormRef");
     },
   },
 };
