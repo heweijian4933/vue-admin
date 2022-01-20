@@ -21,7 +21,8 @@
       <div class="action">
         <el-button type="primary" @click="handleAdd()">新增</el-button>
       </div>
-      <el-table :data="roleList" row-key="_id">
+      <el-table :data="roleList">
+        <!-- 实际上用v-bind="item"会更简洁 -->
         <el-table-column
           v-for="item in columns"
           :key="item.prop"
@@ -69,7 +70,7 @@
     <el-dialog v-model="showModal" title="编辑角色" center>
       <el-form
         :model="roleForm"
-        ref="dialogFormRefRef"
+        ref="dialogFormRef"
         label-width="100px"
         :rules="roleRules"
       >
@@ -147,7 +148,7 @@ export default {
       permissionForm: {},
       currRole: {},
       actionMap: {},
-      pager: { total: 0, pageSize: 10 },
+      pager: { total: 0, pageSize: 10, pageNum: 1 },
       columns: [
         {
           label: "角色名称",
@@ -167,7 +168,7 @@ export default {
             list.forEach((key) => {
               key ? names.push(this.actionMap[key]) : null;
             });
-            return names.join(",");
+            return names.filter((item) => item).join(",");
           },
         },
         {
@@ -294,11 +295,10 @@ export default {
       this.$nextTick(() => {
         Object.assign(this.currRole, row);
         const { checkedKeys } = this.currRole.permissionList;
-        console.log("checkedKeys=>", checkedKeys);
         this.$refs.permissionTreeRef.setCheckedKeys(checkedKeys);
       });
     },
-    handlePermissionSubmit() {
+    async handlePermissionSubmit() {
       let nodes = this.$refs.permissionTreeRef.getCheckedNodes();
       let halfKeys = this.$refs.permissionTreeRef.getHalfCheckedKeys();
       let checkedKeys = [];
@@ -315,18 +315,27 @@ export default {
         _id: this.currRole._id,
         permissionList: {
           checkedKeys,
-          parentKeys: parentKeys.concat(halfKeys),
+          halfCheckedKeys: parentKeys.concat(halfKeys),
         },
       };
-      console.log(params);
+      let res = await this.$api.roleUpdatePermission(params);
+      if (res && res.affectedDocs > 0) {
+        this.showPermission = false;
+        this.$message.success("更新成功");
+        this.getRoleList();
+      }
     },
     getActionMap(list) {
       let actionMap = {};
       const deep = (arr) => {
         arr.forEach((item) => {
-          if (item.children && item.action) {
+          if (item.children && item.children.length > 0 && item.action) {
             actionMap[item._id] = item.menuName;
-          } else if (item.children && !item.action) {
+          } else if (
+            item.children &&
+            item.children.length > 0 &&
+            !item.action
+          ) {
             deep(item.children);
           }
         });

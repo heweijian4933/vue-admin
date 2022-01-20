@@ -37,6 +37,7 @@
       </div>
       <el-table :data="userList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" />
+        <!-- 实际上用v-bind="item"会更简洁 -->
         <el-table-column
           v-for="item in columns"
           :key="item.prop"
@@ -142,7 +143,7 @@
           <el-cascader
             v-model="userForm.deptId"
             placeholder="请选择所属部门"
-            :options="deptAllList"
+            :options="deptTreeList"
             :props="{ checkStrictly: true, value: '_id', label: 'deptName' }"
             show-all-levels
             clearable
@@ -241,7 +242,7 @@ export default {
     // 角色列表=>用于弹框内选择,编辑用户的角色,
     const roleAllList = ref([]);
     // 部门列表=>用于弹框内选择,编辑用户所在部门
-    const deptAllList = ref([]);
+    const deptTreeList = ref([]);
     const action = ref("add");
 
     // 表单校验规则
@@ -381,14 +382,20 @@ export default {
 
     const getRoleAllList = async () => {
       try {
-        roleAllList.value = await ctx.$api.getRoleAllList();
-      } catch (error) {}
+        const { list } = await ctx.$api.getRoleAllList();
+        roleAllList.value = list;
+      } catch (err) {
+        console.log(err);
+      }
     };
 
-    const getDeptAllList = async () => {
+    const getDeptTreeList = async () => {
       try {
-        deptAllList.value = await ctx.$api.getDeptAllList();
-      } catch (error) {}
+        const { list } = await ctx.$api.getDeptTreeList();
+        deptTreeList.value = list;
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     // 用户弹窗关闭
@@ -439,7 +446,7 @@ export default {
       getUserList();
 
       getRoleAllList();
-      getDeptAllList();
+      getDeptTreeList();
     });
 
     return {
@@ -451,7 +458,7 @@ export default {
       showModal,
       userRules,
       roleAllList,
-      deptAllList,
+      deptTreeList,
       action,
 
       getUserList,
@@ -464,7 +471,7 @@ export default {
       handleCurrentChange,
       handleSelectionChange,
       getRoleAllList,
-      getDeptAllList,
+      getDeptTreeList,
       handleAdd,
       handleCancel,
       handleSubmit,

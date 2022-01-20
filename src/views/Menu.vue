@@ -29,6 +29,7 @@
         <el-button type="primary" @click="handleAdd()">新增</el-button>
       </div>
       <el-table :data="menuList" row-key="_id">
+        <!-- 实际上用v-bind="item"会更简洁 -->
         <el-table-column
           v-for="item in columns"
           :key="item.prop"

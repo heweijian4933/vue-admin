@@ -41,9 +41,17 @@ const routes = [
                 name: 'role',
                 path: '/system/role',
                 meta: {
-                    title: '菜单管理'
+                    title: '角色管理'
                 },
                 component: () => import('@/views/Role.vue'),
+            },
+            {
+                name: '部门管理',
+                path: '/system/dept',
+                meta: {
+                    title: "部门管理"
+                },
+                component: () => import('@/views/Dept.vue')
             },
 
         ]
