@@ -67,7 +67,12 @@
     <!-- /主体tabel模块 -->
 
     <!-- 弹窗模块 - 新增/编辑弹框 -->
-    <el-dialog v-model="showModal" title="编辑角色" center>
+    <el-dialog
+      v-model="showModal"
+      title="编辑角色"
+      center
+      :before-close="handleClose"
+    >
       <el-form
         :model="roleForm"
         ref="dialogFormRef"
@@ -284,6 +289,11 @@ export default {
         }
       }
       this.handleReset(formRef);
+    },
+    // 用于用户点击到遮罩时候重置弹框
+    handleClose(done) {
+      this.handleCancel("dialogFormRef");
+      done();
     },
     //分页
     handleCurrentChange(current) {

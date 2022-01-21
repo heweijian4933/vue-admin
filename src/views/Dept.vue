@@ -61,7 +61,12 @@
     <!-- /主体tabel模块 -->
 
     <!-- 弹窗模块 - 新增/编辑弹框 -->
-    <el-dialog v-model="showModal" title="编辑部门" center>
+    <el-dialog
+      v-model="showModal"
+      title="编辑部门"
+      center
+      :before-close="handleClose"
+    >
       <el-form
         :model="deptForm"
         ref="dialogFormRef"
@@ -78,6 +83,7 @@
               label: 'deptName',
             }"
             style="width: 100%"
+            placeholder="不选择 则默认为最行政管理级"
           />
           <!-- <span>不选则直接创建一级菜单</span> -->
         </el-form-item>
@@ -88,9 +94,9 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item prop="user._id" label="负责人">
+        <el-form-item prop="userName" label="负责人">
           <el-select
-            v-model="deptForm.user._id"
+            v-model="deptForm.userName"
             placeholder="请选择负责人"
             @change="handleUserSelect"
           >
@@ -98,15 +104,22 @@
               v-for="item in userList"
               :key="item._id"
               :label="item.userName"
-              :value="item._id"
+              :value="item.userId"
             ></el-option>
           </el-select>
         </el-form-item>
 
-        <el-form-item prop="user.userEmail" label="负责人邮箱">
+        <el-form-item prop="mobile" label="负责人电话">
           <el-input
-            v-model="deptForm.user.userEmail"
-            placeholder="请输入负责人邮箱"
+            v-model="deptForm.mobile"
+            placeholder="负责人电话"
+            disabled
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="userEmail" label="负责人邮箱">
+          <el-input
+            v-model="deptForm.userEmail"
+            placeholder="负责人邮箱"
             disabled
           ></el-input>
         </el-form-item>
@@ -122,6 +135,7 @@
   </div>
 </template>
 <script>
+import { ElMessageBox } from "element-plus";
 import util from "@/utils/util.js";
 export default {
   name: "Dept",
@@ -132,7 +146,7 @@ export default {
       showModal: false,
       action: "add",
       deptForm: {
-        user: {},
+        parentId: [null],
       },
       userList: [],
       pager: { total: 0, pageSize: 10, pageNum: 1 },
@@ -182,7 +196,7 @@ export default {
             trigger: "blur",
           },
         ],
-        "user._id": [
+        userId: [
           {
             required: true,
             message: "请选择负责人",
@@ -195,6 +209,11 @@ export default {
   mounted() {
     this.getDeptTreeList();
     this.getUserAllList();
+  },
+  watch: {
+    "queryForm.deptName"(newVal, oldVal) {
+      if (!newVal) this.getDeptTreeList();
+    },
   },
   methods: {
     // 获取部门列表
@@ -217,11 +236,13 @@ export default {
       }
     },
     // 选择负责人
-    handleUserSelect(_id) {
-      console.log(_id);
-      let selectedUser = this.userList.find((item) => item._id === _id);
+    handleUserSelect(userId) {
+      console.log(userId);
+      let selectedUser = this.userList.find((item) => item.userId === userId);
       if (selectedUser) {
-        this.deptForm.user.userEmail = selectedUser.userEmail;
+        this.deptForm.userId = userId;
+        this.deptForm.mobile = selectedUser.mobile;
+        this.deptForm.userEmail = selectedUser.userEmail;
       }
     },
     // 查询部门列表
@@ -230,7 +251,8 @@ export default {
     },
     // 表单重置
     handleReset(form) {
-      this.$refs[form].resetFields();
+      const ref = this.$refs[form];
+      if (ref) ref.resetFields();
     },
     // 增加部门
     handleAdd(type, row) {
@@ -259,7 +281,7 @@ export default {
     handleSubmit() {
       this.$refs.dialogFormRef.validate(async (valid) => {
         if (valid) {
-          const { action, deptForm } = this;
+          let { action, deptForm } = this;
           let res;
           if (action === "add") {
             res = await this.$api.deptCreate(deptForm);
@@ -282,6 +304,11 @@ export default {
     handleCancel(formRef) {
       this.showModal = false;
       this.handleReset(formRef);
+    },
+    // 用于用户点击到遮罩时候重置弹框
+    handleClose(done) {
+      this.handleCancel("dialogFormRef");
+      done();
     },
     //分页
     handleCurrentChange(current) {

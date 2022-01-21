@@ -75,7 +75,12 @@
     <!-- /主体tabel模块 -->
 
     <!-- 弹窗模块 -->
-    <el-dialog v-model="showModal" title="编辑用户" center>
+    <el-dialog
+      v-model="showModal"
+      title="编辑用户"
+      center
+      :before-close="handleClose"
+    >
       <el-form
         :model="userForm"
         ref="dialogFormRef"
@@ -403,6 +408,12 @@ export default {
       showModal.value = false;
       handleReset("dialogFormRef");
     };
+
+    // 用于用户点击到遮罩时候重置弹框
+    const handleClose = (done) {
+      this.handleCancel("dialogFormRef");
+      done();
+    }
     // 用户提交
     const handleSubmit = () => {
       // showModal.value = false;
@@ -474,6 +485,7 @@ export default {
       getDeptTreeList,
       handleAdd,
       handleCancel,
+      handleClose,
       handleSubmit,
     };
   },

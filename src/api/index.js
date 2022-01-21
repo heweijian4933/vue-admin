@@ -6,7 +6,7 @@ export default {
             url: "menus/treeList",
             method: "get",
             data: params,
-            // mock: true,
+            mock: true,
         })
     },
     menuCreate(params) {
@@ -140,7 +140,7 @@ export default {
             url: "depts/treeList",
             method: "get",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     deptCreate(params) {
@@ -148,15 +148,15 @@ export default {
             url: "depts/create",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     deptUpdate(params) {
         return request({
-            url: "depts/udpate",
+            url: "depts/update",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     deptDel(params) {
@@ -164,7 +164,7 @@ export default {
             url: "depts/delete",
             method: "post",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
 

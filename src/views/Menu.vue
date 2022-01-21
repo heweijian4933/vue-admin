@@ -74,7 +74,12 @@
     <!-- /主体tabel模块 -->
 
     <!-- 弹窗模块 -->
-    <el-dialog v-model="showModal" title="编辑菜单" center>
+    <el-dialog
+      v-model="showModal"
+      title="编辑菜单"
+      center
+      :before-close="handleClose"
+    >
       <el-form
         :model="menuForm"
         ref="dialogFormRef"
@@ -313,6 +318,11 @@ export default {
     handleCancel() {
       this.showModal = false;
       this.handleReset("dialogFormRef");
+    },
+    // 用于用户点击到遮罩时候重置弹框
+    handleClose(done) {
+      this.handleCancel("dialogFormRef");
+      done();
     },
   },
 };
