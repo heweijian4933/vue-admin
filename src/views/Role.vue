@@ -220,9 +220,9 @@ export default {
     // 获取菜单列表
     async getMenuList() {
       try {
-        let list = await this.$api.getMenuList();
-        this.menuList = list;
-        this.getActionMap(list.slice());
+        let { menuList } = await this.$api.getMenuList();
+        this.menuList = menuList;
+        this.getActionMap(menuList.slice());
       } catch (err) {
         throw new Error(err);
       }
@@ -335,6 +335,8 @@ export default {
         this.getRoleList();
       }
     },
+    //判断每层菜单是否具备"action"属性
+    //如果具备, 则说明是按钮的上一层级菜单,所以会将角色对应的这层菜单权限添加到actionMap, 用于表单'权限列表'一栏展示
     getActionMap(list) {
       let actionMap = {};
       const deep = (arr) => {

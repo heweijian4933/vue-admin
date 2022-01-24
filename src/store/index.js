@@ -8,6 +8,9 @@ import config from '@/config'
 
 const state = {
     userInfo: storage.getItem("userInfo") || {}, //获取用户信息
+    token: storage.getItem("token") || "", //获取用户token
+    menuList: storage.getItem("menuList") || [], //获取菜单(树形)列表
+    actionList: storage.getItem("actionList") || {}, //获取按钮权限标识列表
 }
 
 export default createStore({

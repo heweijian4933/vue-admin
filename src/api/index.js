@@ -6,7 +6,7 @@ export default {
             url: "menus/treeList",
             method: "get",
             data: params,
-            mock: true,
+            // mock: true,
         })
     },
     menuCreate(params) {

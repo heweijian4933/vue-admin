@@ -2,7 +2,7 @@
   <div class="user-view">
     <!-- 搜索查询模块 -->
     <div class="query-form">
-      <el-form :inline="true" :model="queryForm" ref="userQueryRef">
+      <el-form :inline="true" :model="queryForm" ref="queryFormRef">
         <el-form-item prop="userId" label="用户ID">
           <el-input v-model="queryForm.userId" placeholder="请输入用户ID" />
         </el-form-item>
@@ -21,7 +21,7 @@
 
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
-          <el-button type="danger" @click="handleReset('userQueryRef')"
+          <el-button type="danger" @click="handleReset('queryFormRef')"
             >重置</el-button
           >
         </el-form-item>
@@ -32,8 +32,15 @@
     <!-- 主体tabel模块 -->
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleAdd">新增</el-button>
-        <el-button type="danger" @click="handleBatchDel">批量删除</el-button>
+        <el-button type="primary" @click="handleAdd" v-has:type="'user-create'"
+          >新增</el-button
+        >
+        <el-button
+          type="danger"
+          @click="handleBatchDel"
+          v-has:type="'user-delete'"
+          >批量删除</el-button
+        >
       </div>
       <el-table :data="userList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" />
@@ -52,12 +59,14 @@
               @click="handleEdit(scope.row)"
               type="primary"
               size="small"
+              v-has:type="'user-update'"
               >编辑</el-button
             >
             <el-button
               type="danger"
               size="small"
               @click="handleDel({ row: scope.row })"
+              v-has:type="'user-delete'"
               >删除</el-button
             >
           </template>
@@ -166,329 +175,292 @@
     <!-- /弹窗模块 -->
   </div>
 </template>
-<script>
+<script setup>
 import { onMounted, reactive, ref, getCurrentInstance, toRaw } from "vue";
 import util from "@/utils/util.js";
-export default {
-  name: "User",
-  setup() {
-    const { ctx } = getCurrentInstance();
-    // 查询模块对象
-    const queryForm = reactive({
-      state: 0,
-    });
-    // 分页模块对象
-    const pager = reactive({
-      pageNum: 1,
-      pageSize: 10,
-    });
+const { ctx } = getCurrentInstance();
+// 查询模块对象
+const queryForm = reactive({ state: 0 });
+// 分页模块对象
+const pager = reactive({
+  pageNum: 1,
+  pageSize: 10,
+});
+// table主体对象
+const userList = ref([]);
 
-    // table主体对象
-    const userList = ref([]);
-    const columns = reactive([
-      {
-        label: "用户ID",
-        prop: "userId",
-      },
-      {
-        label: "用户名",
-        prop: "userName",
-      },
-      {
-        label: "用户邮箱",
-        prop: "userEmail",
-      },
-      {
-        label: "用户角色",
-        prop: "role",
-        formatter(row, column, cellValue, index) {
-          return {
-            0: "管理员",
-            1: "普通用户",
-          }[cellValue];
-        },
-      },
-      {
-        label: "用户状态",
-        prop: "state",
-        formatter(row, column, cellValue, index) {
-          return {
-            1: "在职",
-            2: "离职",
-            3: "试用期",
-          }[cellValue];
-        },
-      },
-      {
-        label: "注册时间",
-        prop: "createTime",
-        formatter(row, colume, cellValue, index) {
-          return cellValue ? util.dateFmt(new Date(cellValue)) : null;
-        },
-      },
-      {
-        label: "最后登录时间",
-        prop: "lastLoginTime",
-        formatter(row, colume, cellValue, index) {
-          return cellValue ? util.dateFmt(new Date(cellValue)) : "无登录记录";
-        },
-      },
-    ]);
-
-    // table主体多选功能关联的userId
-    const checkedIds = ref([]);
-    // 弹框显示控制flag
-    const showModal = ref(false);
-    // 弹框用户对象
-    const userForm = reactive({
-      state: 3,
-      sex: 0,
-    });
-    // 角色列表=>用于弹框内选择,编辑用户的角色,
-    const roleAllList = ref([]);
-    // 部门列表=>用于弹框内选择,编辑用户所在部门
-    const deptTreeList = ref([]);
-    const action = ref("add");
-
-    // 表单校验规则
-    const userRules = reactive({
-      userName: [
-        {
-          required: true,
-          message: "请输入用户姓名",
-          trigger: "blur",
-        },
-      ],
-      userPwd: [
-        {
-          required: action.value === "add" ? true : false,
-          message: "请输入 用户密码",
-          trigger: "blur",
-        },
-        // Todo 密码正则校验
-      ],
-      userEmail: [
-        {
-          required: true,
-          message: "请输入用户邮箱",
-          trigger: "blur",
-        },
-      ],
-      mobile: [
-        {
-          pattern: /1[3-9]\d{9}/,
-          message: "请输入正确手机号格式",
-          trigger: "blur",
-        },
-      ],
-      deptId: [
-        {
-          required: true,
-          message: "请选择用户所在部门",
-          trigger: "blur",
-        },
-      ],
-    });
-
-    // 获取用户列表
-    const getUserList = async () => {
-      const params = { ...queryForm, ...pager };
-      try {
-        const { list, page } = await ctx.$api.getUserList(params);
-        // console.log({ list, page });
-        userList.value = list;
-        pager.total = page.total;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    // 查询用户列表
-    const handleQuery = () => {
-      getUserList();
-    };
-
-    // 重置用户列表
-    const handleReset = (form) => {
-      //   console.log(ctx.$refs.form);
-      ctx.$refs[form].resetFields();
-    };
-
-    // 删除单个用户
-    /**
-     * row {proxy} 表单中单个删除时传入,直接在template中写入参
-     * ids {array} 表单中多个删除时传入
-     */
-    const handleDel = async ({ row, ids = [] }) => {
-      try {
-        let userIds = [];
-        //参数校验及筛选
-        if (row && row.userId) {
-          userIds.push(row.userId);
-        }
-        if (ids && ids.length > 0) {
-          userIds = userIds.concat(ids);
-        }
-        if (userIds.length <= 0) return;
-
-        let res = await ctx.$api.userDel({
-          userIds, //可单个删除或者多个删除
-        });
-
-        if (res && res.affectedDocs > 0) {
-          //返回字段变动时将影响判断,需要非常注意
-          ctx.$message.success("成功删除");
-          getUserList();
-        } else if (res && res.affectedDocs <= 0) {
-          ctx.$message.success('该人员已删除/设置为"离职"');
-        } else {
-          ctx.$message.error("删除失败");
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    // 批量删除用户
-    const handleBatchDel = async () => {
-      if (checkedIds.value.length <= 0) {
-        ctx.$message.error("请选择要删除的用户");
-      } else {
-        handleDel({ ids: checkedIds.value });
-      }
-    };
-
-    // 增加新用户
-    const handleAdd = () => {
-      action.value = "add";
-      showModal.value = true;
-    };
-    // 编辑用户
-    const handleEdit = (row) => {
-      action.value = "edit";
-      showModal.value = true;
-      ctx.$nextTick(() => {
-        Object.assign(userForm, row);
-      });
-    };
-
-    //分页
-    const handleCurrentChange = (current) => {
-      pager.pageNum = current;
-      getUserList();
-    };
-    //多选
-    const handleSelectionChange = (list) => {
-      // checkedIds.value是一个Proxy对象
-      checkedIds.value = list.map(
-        (item) => JSON.parse(JSON.stringify(item)).userId
-      );
-    };
-
-    const getRoleAllList = async () => {
-      try {
-        const { list } = await ctx.$api.getRoleAllList();
-        roleAllList.value = list;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    const getDeptTreeList = async () => {
-      try {
-        const { list } = await ctx.$api.getDeptTreeList();
-        deptTreeList.value = list;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    // 用户弹窗关闭
-    const handleCancel = () => {
-      showModal.value = false;
-      handleReset("dialogFormRef");
-    };
-
-    // 用于用户点击到遮罩时候重置弹框
-    const handleClose = (done) {
-      this.handleCancel("dialogFormRef");
-      done();
-    }
-    // 用户提交
-    const handleSubmit = () => {
-      // showModal.value = false;
-      ctx.$refs.dialogFormRef.validate(async (valid) => {
-        if (valid) {
-          let params = toRaw(userForm); //把响应式对象转换成普通对象
-          params.userEmail = /@/.test(params.userEmail)
-            ? params.userEmail
-            : params.userEmail + "@manager.com";
-          let res, message;
-          if (action.value == "add") {
-            res = await ctx.$api.userCreate(params);
-            message = "用户新增成功";
-          } else if (action.value == "edit") {
-            res = await ctx.$api.userUpdate(params);
-            message = "用户更新成功";
-          }
-          if (res && res.affectedDocs > 0) {
-            showModal.value = false;
-            ctx.$message.success(message);
-            handleReset("dialogFormRef");
-            getUserList();
-          } else if (res && res.affectedDocs <= 0) {
-            if (action.value == "add") {
-              ctx.$message.error("创建失败");
-            } else if (action.value == "edit") {
-              ctx.$message.success("信息无变更");
-            }
-          } else {
-            if (action.value == "add") {
-              ctx.$message.error("创建失败");
-            } else if (action.value == "edit") {
-              ctx.$message.success("更新失败");
-            }
-          }
-        }
-      });
-    };
-
-    onMounted(() => {
-      getUserList();
-
-      getRoleAllList();
-      getDeptTreeList();
-    });
-
-    return {
-      pager,
-      queryForm,
-      userList,
-      columns,
-      userForm,
-      showModal,
-      userRules,
-      roleAllList,
-      deptTreeList,
-      action,
-
-      getUserList,
-      handleQuery,
-      handleReset,
-      handleAdd,
-      handleDel,
-      handleBatchDel,
-      handleEdit,
-      handleCurrentChange,
-      handleSelectionChange,
-      getRoleAllList,
-      getDeptTreeList,
-      handleAdd,
-      handleCancel,
-      handleClose,
-      handleSubmit,
-    };
+const columns = reactive([
+  {
+    label: "用户ID",
+    prop: "userId",
   },
+  {
+    label: "用户名",
+    prop: "userName",
+  },
+  {
+    label: "用户邮箱",
+    prop: "userEmail",
+  },
+  {
+    label: "用户角色",
+    prop: "role",
+    formatter(row, column, cellValue, index) {
+      return {
+        0: "管理员",
+        1: "普通用户",
+      }[cellValue];
+    },
+  },
+  {
+    label: "用户状态",
+    prop: "state",
+    formatter(row, column, cellValue, index) {
+      return {
+        1: "在职",
+        2: "离职",
+        3: "试用期",
+      }[cellValue];
+    },
+  },
+  {
+    label: "注册时间",
+    prop: "createTime",
+    formatter(row, colume, cellValue, index) {
+      return cellValue ? util.dateFmt(new Date(cellValue)) : null;
+    },
+  },
+  {
+    label: "最后登录时间",
+    prop: "lastLoginTime",
+    formatter(row, colume, cellValue, index) {
+      return cellValue ? util.dateFmt(new Date(cellValue)) : "无登录记录";
+    },
+  },
+]);
+
+// table主体多选功能关联的userId
+const checkedIds = ref([]);
+// 弹框显示控制flag
+const showModal = ref(false);
+// 弹框用户对象
+const userForm = reactive({
+  state: 3,
+  sex: 0,
+});
+// 角色列表=>用于弹框内选择,编辑用户的角色,
+const roleAllList = ref([]);
+// 部门列表=>用于弹框内选择,编辑用户所在部门
+const deptTreeList = ref([]);
+const action = ref("add");
+
+// 表单校验规则
+const userRules = reactive({
+  userName: [
+    {
+      required: true,
+      message: "请输入用户姓名",
+      trigger: "blur",
+    },
+  ],
+  userPwd: [
+    {
+      required: action.value === "add" ? true : false,
+      message: "请输入 用户密码",
+      trigger: "blur",
+    },
+    // Todo 密码正则校验
+  ],
+  userEmail: [
+    {
+      required: true,
+      message: "请输入用户邮箱",
+      trigger: "blur",
+    },
+  ],
+  mobile: [
+    {
+      pattern: /1[3-9]\d{9}/,
+      message: "请输入正确手机号格式",
+      trigger: "blur",
+    },
+  ],
+  deptId: [
+    {
+      required: true,
+      message: "请选择用户所在部门",
+      trigger: "blur",
+    },
+  ],
+});
+// 获取用户列表
+const getUserList = async () => {
+  const params = { ...queryForm, ...pager };
+  try {
+    const { list, page } = await ctx.$api.getUserList(params);
+    // console.log({list, page});
+    userList.value = list;
+    pager.total = page.total;
+  } catch (err) {
+    console.log(err);
+  }
 };
+
+// 查询用户列表
+const handleQuery = () => {
+  getUserList();
+};
+
+// 重置用户列表
+const handleReset = (form) => {
+  //   console.log(ctx.$refs.form);
+  ctx.$refs[form].resetFields();
+};
+
+// 删除单个用户
+/**
+ * row {proxy} 表单中单个删除时传入,直接在template中写入参
+ * ids {array} 表单中多个删除时传入
+ */
+const handleDel = async ({ row, ids = [] }) => {
+  try {
+    let userIds = [];
+    //参数校验及筛选
+    if (row && row.userId) {
+      userIds.push(row.userId);
+    }
+    if (ids && ids.length > 0) {
+      userIds = userIds.concat(ids);
+    }
+    if (userIds.length <= 0) return;
+
+    let res = await ctx.$api.userDel({
+      userIds, //可单个删除或者多个删除
+    });
+
+    if (res && res.affectedDocs > 0) {
+      //返回字段变动时将影响判断,需要非常注意
+      ctx.$message.success("成功删除");
+      getUserList();
+    } else if (res && res.affectedDocs <= 0) {
+      ctx.$message.success('该人员已删除/设置为"离职"');
+    } else {
+      ctx.$message.error("删除失败");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// 批量删除用户
+const handleBatchDel = async () => {
+  if (checkedIds.value.length <= 0) {
+    ctx.$message.error("请选择要删除的用户");
+  } else {
+    handleDel({ ids: checkedIds.value });
+  }
+};
+
+// 增加新用户
+const handleAdd = () => {
+  action.value = "add";
+  showModal.value = true;
+};
+// 编辑用户
+const handleEdit = (row) => {
+  action.value = "edit";
+  showModal.value = true;
+  ctx.$nextTick(() => {
+    Object.assign(userForm, row);
+  });
+};
+
+//分页
+const handleCurrentChange = (current) => {
+  pager.pageNum = current;
+  getUserList();
+};
+//多选
+const handleSelectionChange = (list) => {
+  // checkedIds.value是一个Proxy对象
+  checkedIds.value = list.map(
+    (item) => JSON.parse(JSON.stringify(item)).userId
+  );
+};
+
+const getRoleAllList = async () => {
+  try {
+    const { list } = await ctx.$api.getRoleAllList();
+    roleAllList.value = list;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getDeptTreeList = async () => {
+  try {
+    const { list } = await ctx.$api.getDeptTreeList();
+    deptTreeList.value = list;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// 用户弹窗关闭
+const handleCancel = () => {
+  showModal.value = false;
+  handleReset("dialogFormRef");
+};
+
+// 用于用户点击到遮罩时候重置弹框
+const handleClose = (done) => {
+  handleCancel("dialogFormRef");
+  done();
+};
+// 用户提交
+const handleSubmit = () => {
+  // showModal.value = false;
+  ctx.$refs.dialogFormRef.validate(async (valid) => {
+    if (valid) {
+      let params = toRaw(userForm); //把响应式对象转换成普通对象
+      params.userEmail = /@/.test(params.userEmail)
+        ? params.userEmail
+        : params.userEmail + "@manager.com";
+      let res, message;
+      if (action.value == "add") {
+        res = await ctx.$api.userCreate(params);
+        message = "用户新增成功";
+      } else if (action.value == "edit") {
+        res = await ctx.$api.userUpdate(params);
+        message = "用户更新成功";
+      }
+      if (res && res.affectedDocs > 0) {
+        showModal.value = false;
+        ctx.$message.success(message);
+        handleReset("dialogFormRef");
+        getUserList();
+      } else if (res && res.affectedDocs <= 0) {
+        if (action.value == "add") {
+          ctx.$message.error("创建失败");
+        } else if (action.value == "edit") {
+          ctx.$message.success("信息无变更");
+        }
+      } else {
+        if (action.value == "add") {
+          ctx.$message.error("创建失败");
+        } else if (action.value == "edit") {
+          ctx.$message.success("更新失败");
+        }
+      }
+    }
+  });
+};
+
+onMounted(() => {
+  getUserList();
+
+  getRoleAllList();
+  getDeptTreeList();
+});
 </script>
 <style lang="scss"></style>

@@ -109,9 +109,17 @@ export default {
       this.noticeCount = count || this.noticeCount;
     },
     async getMenuList() {
-      // Todo 权限: 根据params用户信息来返回
-      const menuList = await this.$api.getMenuList(); //{ mock: true }
-      // console.log(menuList);
+      //[已完成] 权限: 根据params用户信息来返回
+      // 因为在登陆的时候已经完成路由自动加载并设定对应的菜单权限, 所以这里无需再重复请求
+      //只需对持久化的数据进行一次判断即可
+      let { menuList, actionList } = this.$store.state;
+      if (!menuList || !actionList) {
+        let res = this.$api.getMenuList();
+        menuList = res.menuList;
+        actionList = res.actionList;
+        this.$store.commit("saveUserMenus", menuList);
+        this.$store.commit("saveUserActions", actionList);
+      }
       this.userMenu = menuList;
     },
   },

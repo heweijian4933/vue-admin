@@ -114,7 +114,7 @@
         <el-form-item
           prop="icon"
           label="菜单图标"
-          v-show="menuForm.menuType == 1"
+          v-if="menuForm.menuType == 1"
         >
           <el-input
             v-model="menuForm.icon"
@@ -125,7 +125,7 @@
         <el-form-item
           label="路由地址"
           prop="path"
-          v-show="menuForm.menuType == 1"
+          v-if="menuForm.menuType == 1"
         >
           <el-input v-model="menuForm.path" placeholder="请输入路由地址">
           </el-input>
@@ -134,7 +134,7 @@
         <el-form-item
           label="权限标识"
           prop="menuCode"
-          v-show="menuForm.menuType == 2"
+          v-if="menuForm.menuType == 2"
         >
           <el-input v-model="menuForm.menuCode" placeholder="请输入权限标识" />
         </el-form-item>
@@ -142,7 +142,7 @@
         <el-form-item
           label="组件路径"
           prop="component"
-          v-show="menuForm.menuType == 1"
+          v-if="menuForm.menuType == 1"
         >
           <el-input v-model="menuForm.component" placeholder="请输入组件路径" />
         </el-form-item>
@@ -250,8 +250,10 @@ export default {
     // 获取菜单列表
     async getMenuList() {
       try {
-        let res = await this.$api.getMenuList(this.queryForm);
-        this.menuList = res;
+        let { menuList, actionList } = await this.$api.getMenuList(
+          this.queryForm
+        );
+        this.menuList = menuList;
       } catch (err) {
         throw new Error(err);
       }

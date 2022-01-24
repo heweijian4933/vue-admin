@@ -19,7 +19,7 @@ const service = axios.create({
 
 // 请求拦截封装
 service.interceptors.request.use(req => {
-    const { token } = store.state.userInfo
+    const { token } = store.state
     const headers = req.headers
     if (!headers.Authorization) headers.Authorization = "Bearer " + token
     return req
@@ -31,6 +31,11 @@ service.interceptors.response.use(res => {
 
     if (code === 200) {
         // 说明响应正常
+        const { token } = data
+        if (token) {
+            //说明签发(/续签)了token
+            store.commit("saveToken", token);
+        }
         return data
     } else if (code === 50001) {
         // 50001: token认证失败(大部分情况下是因为token过期)
