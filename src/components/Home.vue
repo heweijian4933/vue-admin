@@ -100,6 +100,7 @@ export default {
     handleLogout(key) {
       if (key == "logout") {
         this.$store.commit("clearUserInfo");
+        this.$storage.clearAll();
         this.$router.push("/login");
       }
     },
@@ -112,8 +113,14 @@ export default {
       //[已完成] 权限: 根据params用户信息来返回
       // 因为在登陆的时候已经完成路由自动加载并设定对应的菜单权限, 所以这里无需再重复请求
       //只需对持久化的数据进行一次判断即可
-      let { menuList, actionList } = this.$store.state;
-      if (!menuList || !actionList) {
+      let menuList = this.$storage.getItem("menuList");
+      let actionList = this.$storage.getItem("actionList");
+      if (
+        !menuList ||
+        !actionList ||
+        menuList.length <= 0 ||
+        actionList.length <= 0
+      ) {
         let res = this.$api.getMenuList();
         menuList = res.menuList;
         actionList = res.actionList;

@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import store from '@/store'
+import storage from '@/utils/storage.js'
 import Home from '@/components/Home.vue'
 import API from './../api'
 import util from './../utils/util.js'
@@ -58,11 +59,12 @@ async function loadAsyncRoutes() {
             store.commit("saveUserActions", actionList);
             let routes = util.generateRoutes(menuList)
             routes.forEach(route => {
-                let url = `./../views/${route.component}.vue`
+                let url = `./../views/${route.component}.vue`.replace('//', '/')
                 route.component = () => import(/* @vite-ignore */url) //只能用./或者../开头不能用@, 且结尾一定要带.vue
                 // 详情见https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitations
                 router.addRoute("home", route)
             })
+            // console.log("router.getRoutes()", router.getRoutes());
         } catch (error) {
 
         }
@@ -70,7 +72,7 @@ async function loadAsyncRoutes() {
     }
 
 }
-loadAsyncRoutes();
+await loadAsyncRoutes(); // 必须要同步, 否则router加载页面的时候可能页面参数还没有返回就会报错
 
 //导航守卫
 router.beforeEach((to, from, next) => {

@@ -15,7 +15,12 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button
+            type="primary"
+            @click="handleQuery"
+            v-has:type="'menu-query'"
+            >查询</el-button
+          >
           <el-button type="danger" @click="handleReset('menuQueryRef')"
             >重置</el-button
           >
@@ -26,7 +31,12 @@
     <!-- 主体tabel模块 -->
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleAdd()">新增</el-button>
+        <el-button
+          type="primary"
+          @click="handleAdd()"
+          v-has:type="'menu-create'"
+          >新增</el-button
+        >
       </div>
       <el-table :data="menuList" row-key="_id">
         <!-- 实际上用v-bind="item"会更简洁 -->
@@ -44,18 +54,21 @@
               @click="handleAdd(2, scope.row)"
               type="primary"
               size="small"
+              v-has:type="'menu-create'"
               >新增</el-button
             >
             <el-button
               @click="handleEdit(scope.row)"
               type="primary"
               size="small"
+              v-has:type="'menu-update'"
               >编辑</el-button
             >
             <el-button
               type="danger"
               size="small"
               @click="handleDel(scope.row._id)"
+              v-has:type="'menu-delete'"
               >删除</el-button
             >
           </template>

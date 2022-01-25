@@ -8,7 +8,12 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button
+            type="primary"
+            @click="handleQuery"
+            v-has:type="'role-query'"
+            >查询</el-button
+          >
           <el-button type="danger" @click="handleReset('queryFormRef')"
             >重置</el-button
           >
@@ -19,7 +24,12 @@
     <!-- 主体tabel模块 -->
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleAdd()">新增</el-button>
+        <el-button
+          type="primary"
+          @click="handleAdd()"
+          v-has:type="'role-create'"
+          >新增</el-button
+        >
       </div>
       <el-table :data="roleList">
         <!-- 实际上用v-bind="item"会更简洁 -->
@@ -37,17 +47,20 @@
               @click="handleEdit(scope.row)"
               type="primary"
               size="small"
+              v-has:type="'role-update'"
               >编辑</el-button
             >
             <el-button
               @click="handlePermission(scope.row)"
               type="primary"
               size="small"
+              v-has:type="'role-update'"
               >设置权限</el-button
             >
             <el-button
               type="danger"
               size="small"
+              v-has:type="'role-delete'"
               @click="handleDel(scope.row._id)"
               >删除</el-button
             >
@@ -220,7 +233,16 @@ export default {
     // 获取菜单列表
     async getMenuList() {
       try {
-        let { menuList } = await this.$api.getMenuList();
+        // 因为在登陆的时候已经完成路由自动加载并设定对应的菜单权限, 所以这里无需再重复请求
+        //只需对持久化的数据进行一次判断即可
+        let menuList = this.$storage.getItem("menuList");
+        if (!menuList || menuList.length <= 0) {
+          let res = this.$api.getMenuList();
+          menuList = res.menuList;
+          actionList = res.actionList;
+          this.$store.commit("saveUserMenus", menuList);
+          this.$store.commit("saveUserActions", actionList);
+        }
         this.menuList = menuList;
         this.getActionMap(menuList.slice());
       } catch (err) {

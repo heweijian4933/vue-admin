@@ -20,7 +20,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button type="primary" @click="handleQuery" v-has:type="'user-query'">查询</el-button>
           <el-button type="danger" @click="handleReset('queryFormRef')"
             >重置</el-button
           >

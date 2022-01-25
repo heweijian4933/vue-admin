@@ -177,5 +177,15 @@ export default {
             data: params,
             mock: true,
         })
-    }
+    },
+
+    // 休假模块
+    getLeaveList(params) {
+        return request({
+            url: "leaves/list",
+            method: "get",
+            data: params,
+            mock: true,
+        })
+    },
 }

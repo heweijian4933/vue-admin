@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+import util from "@/utils/util.js";
 export default {
   name: "Login",
   data() {
@@ -60,11 +61,11 @@ export default {
         if (valid) {
           this.$api
             .login(this.userForm)
-            .then((res) => {
+            .then(async (res) => {
               const { userInfo } = res;
               this.$message.success("登陆成功");
               this.$store.commit("saveUserInfo", userInfo);
-              this.loadAsyncRoutes();
+              await this.loadAsyncRoutes();
               // token持久化在axios响应拦截已处理
               setTimeout(() => {
                 this.$router.push("/welcome");
@@ -79,15 +80,14 @@ export default {
       });
     },
     async loadAsyncRoutes() {
-      const { userInfo, token } = this.$store.state;
-      if (token) {
+      if (this.$storage.getItem("token")) {
         try {
           const { menuList, actionList } = await this.$api.getMenuList();
           this.$store.commit("saveUserMenus", menuList);
           this.$store.commit("saveUserActions", actionList);
           let routes = util.generateRoutes(menuList);
           routes.forEach((route) => {
-            let url = `./../views/${route.component}.vue`;
+            let url = `./../views/${route.component}.vue`.replace("//", "/");
             route.component = () => import(/* @vite-ignore */ url); //只能用./或者../开头不能用@, 且结尾一定要带.vue
             // 详情见https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitations
             this.$router.addRoute("home", route);
